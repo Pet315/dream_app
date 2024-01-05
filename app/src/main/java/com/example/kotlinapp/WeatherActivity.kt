@@ -5,10 +5,12 @@ import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ListView
+import android.widget.TextView
 import android.widget.Toast
 import java.net.HttpURLConnection
 import java.net.URL
@@ -19,6 +21,10 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.FormBody
+import okhttp3.Response
 
 class WeatherActivity : AppCompatActivity() {
     @SuppressLint("MissingInflatedId")
@@ -37,11 +43,11 @@ class WeatherActivity : AppCompatActivity() {
         weatherList.setOnItemClickListener { adapterView, view, i, l ->
             val text = weatherList.getItemAtPosition(i).toString()
 
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(text))
-            startActivity(intent)
+//            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(text))
+//            startActivity(intent)
 
-//            adapter.remove(text)
-//            Toast.makeText(this, "Ви видалили: $text", Toast.LENGTH_LONG).show()
+            adapter.remove(text)
+            Toast.makeText(this, "Ви видалили: $text", Toast.LENGTH_LONG).show()
         }
 
         searchWeather.setOnClickListener {
@@ -51,43 +57,38 @@ class WeatherActivity : AppCompatActivity() {
 
             // drafts
 
-            val client = OkHttpClient()
+            val fetchData = OkHttpClient()
 
-            // Створення HTTP запиту
             val request = Request.Builder()
                 .url(url)
                 .build()
 
-            // Виконання запиту та обробка відповіді
-//            client.newCall(request).execute().use { response ->
-//                if (!response.isSuccessful) throw IOException("Unexpected code $response")
-//
-//                val jsonResponse = response.body?.string()
-//
-//                data class Weather(
-//                    val id: Int,
-//                    val main: String,
-//                    val description: String,
-//                    val icon: String
-//                )
-//
-//                // Клас для зовнішнього об'єкта (якщо він існує у вашому JSON)
-//                data class WeatherResponse(
-//                    val weather: List<Weather>
-//                )
-//
-//                val gson = Gson()
-//                val weatherResponse = gson.fromJson(jsonResponse, WeatherResponse::class.java)
-//
-//                // Витягування поля 'description' з першого елемента масиву 'weather'
-//                val description = weatherResponse.weather.firstOrNull()?.description
-////                if(cityName != "")
-////                    adapter.insert(description, 0)
-//            }
 
-            if(cityName != "")
-//                adapter.insert("$name, age: $age", 0)
-                adapter.insert(url, 0)
+
+            fetchData.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    e.printStackTrace()
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    response.use {
+                        val body = response.body?.string()
+                        val jsonObject = JSONObject(body.toString())
+
+                        val weatherArray = jsonObject.getJSONArray("weather")
+                        val firstWeatherObject = weatherArray.getJSONObject(0)
+                        val desc = firstWeatherObject.getString("description")
+
+                        val temp = jsonObject.getJSONObject("main").getString("temp").toString()
+
+
+                        runOnUiThread {
+                            if(cityName != "")
+                                adapter.insert("Опис: $desc, температура: $temp", 0)
+                        }
+                    }
+                }
+            })
 
         }
     }

@@ -59,4 +59,16 @@
 
     </ListView>
 
+<!--    <TextView-->
+<!--        android:id="@+id/weather_text"-->
+<!--        android:paddingHorizontal="20dp"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:paddingVertical="10dp"-->
+<!--        android:textStyle="bold"-->
+<!--        android:layout_marginTop="550dp"-->
+<!--        android:textSize="15sp"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="TextView"-->
+<!--        tools:ignore="MissingConstraints" />-->
+
 </androidx.constraintlayout.widget.ConstraintLayout>
