@@ -1,6 +1,8 @@
 package com.example.kotlinapp
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.ArrayAdapter
@@ -12,12 +14,17 @@ import java.net.HttpURLConnection
 import java.net.URL
 import org.json.JSONObject
 import org.json.JSONException
+import java.io.IOException
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 
 class WeatherActivity : AppCompatActivity() {
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_notes)
+        setContentView(R.layout.activity_weather)
 
         val weatherList = findViewById<ListView>(R.id.weather_list)
         val city: EditText = findViewById(R.id.city)
@@ -29,39 +36,58 @@ class WeatherActivity : AppCompatActivity() {
 
         weatherList.setOnItemClickListener { adapterView, view, i, l ->
             val text = weatherList.getItemAtPosition(i).toString()
-            adapter.remove(text)
 
-            Toast.makeText(this, "Ви видалили: $text", Toast.LENGTH_LONG).show()
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(text))
+            startActivity(intent)
+
+//            adapter.remove(text)
+//            Toast.makeText(this, "Ви видалили: $text", Toast.LENGTH_LONG).show()
         }
 
         searchWeather.setOnClickListener {
             val cityName = city.text.toString().trim()
             val key = "58b20997ae2f79d038c31b456cafaafd"
-            val url = "https://api.openweathermap.org/data/2.5/weather?q=$cityName&appid=$key&units=metric&lang=ru"
+            val url = "https://api.openweathermap.org/data/2.5/weather?q=$cityName&appid=$key&units=metric&lang=uk"
 
-//            val connection = URL(url).openConnection() as HttpURLConnection
-//            connection.requestMethod = "GET"
-//            connection.connect()
-//
-//            val weatherData = connection.inputStream.bufferedReader().use { it.readText() }
-//
-//            println(weatherData)
-//
-//            val description = weatherData.getJSONObject("weather").getJSONObject(0).getString("description")
-//            val temperature = weatherData.getJSONObject("main").getDouble("temp")
-//
-//            if(description != "")
-//                adapter.insert("$description, температура: $temperature", 0)
+            // drafts
 
-//            val weatherData = URL(url).readText()
+            val client = OkHttpClient()
 
-            val jsonString = "{\"name\": \"John\", \"age\": 30}"
-            val jsonObject = JSONObject(jsonString)
-            val name = jsonObject.getString("name")
-            val age = jsonObject.getInt("age")
+            // Створення HTTP запиту
+            val request = Request.Builder()
+                .url(url)
+                .build()
 
-            if(name != "")
-                adapter.insert("$name, age: $age", 0)
+            // Виконання запиту та обробка відповіді
+//            client.newCall(request).execute().use { response ->
+//                if (!response.isSuccessful) throw IOException("Unexpected code $response")
+//
+//                val jsonResponse = response.body?.string()
+//
+//                data class Weather(
+//                    val id: Int,
+//                    val main: String,
+//                    val description: String,
+//                    val icon: String
+//                )
+//
+//                // Клас для зовнішнього об'єкта (якщо він існує у вашому JSON)
+//                data class WeatherResponse(
+//                    val weather: List<Weather>
+//                )
+//
+//                val gson = Gson()
+//                val weatherResponse = gson.fromJson(jsonResponse, WeatherResponse::class.java)
+//
+//                // Витягування поля 'description' з першого елемента масиву 'weather'
+//                val description = weatherResponse.weather.firstOrNull()?.description
+////                if(cityName != "")
+////                    adapter.insert(description, 0)
+//            }
+
+            if(cityName != "")
+//                adapter.insert("$name, age: $age", 0)
+                adapter.insert(url, 0)
 
         }
     }
